@@ -1,0 +1,87 @@
+;
+; maple_tx.pio
+;
+; Write bits to the Dreamcast Maple bus
+;
+; Copyright (c) 2024 Colin Luoma
+;
+
+.program maple_tx
+
+start:
+    pull
+    set pins 3 [1]      ; both pins HIGH in preparation for writing
+
+    set y 3
+sop:                    ; send start of packet
+    set pins 2 [3]
+    set pins 0 [3]
+    jmp y-- sop
+    set pins 2 [2]
+    set pins 3 [3]
+
+phase1:                 ; phase 1 - pin 1 is HIGH and pin 2 is LOW
+    out x 1
+    set pins 1 [3]
+    jmp !x phase1_zero
+phase1_one:             ; send a '1' - pin 2 goes HIGH then pin 1 goes LOW
+    set pins 3 [1]
+    set pins 2
+    jmp phase1_reset
+phase1_zero:            ; send a '0' - pin 2 stays LOW and pin 1 goes LOW
+    set pins 0 [2]
+phase1_reset:
+    set pins 2 [1]
+phase2:                 ; phase 2 - pin 1 is LOW and pin 2 is HIGH
+    out x 1
+    set pins 2
+    jmp !x phase2_zero
+phase2_one:             ; send a '1' - pin 1 goes HIGH then pin 2 goes LOW
+    set pins 3 [1]
+    set pins 1
+    jmp phase2_reset
+phase2_zero:            ; send a '0' - pin 1 stays LOW and pin 2 goes LOW
+    set pins 0
+phase2_reset:
+    jmp !osre phase1 [2]    ; trigger end of packet when no more data in output shift register, else keep sending data
+
+eop:                    ; end of packet
+    set pins 3 [5]
+    set pins 1 [3]
+    set pins 0 [3]
+    set pins 1 [3]
+    set pins 0 [3]
+    set pins 1 [2]
+
+% c-sdk {
+#include "hardware/clocks.h"
+#include "hardware/gpio.h"
+
+static inline void maple_tx_program_init(PIO pio, uint sm, uint offset, uint pin, float clock_div)
+{
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, false);
+    pio_gpio_init(pio, pin);
+    pio_gpio_init(pio, pin+1);
+
+    pio_sm_config c = maple_tx_program_get_default_config(offset);
+
+    sm_config_set_out_pins(&c, pin, 2);
+    sm_config_set_set_pins(&c, pin, 2);
+    sm_config_set_sideset_pins(&c, pin+1);
+    sm_config_set_jmp_pin(&c, pin); // for JMP
+
+    // Shift to right, autopull enabled 8 bits at a time
+    sm_config_set_out_shift(&c, false, true, 8);
+
+    // Deeper FIFO as we're not doing any RX
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    // Set the state machine clock divider
+    sm_config_set_clkdiv(&c, clock_div);
+
+    pio_sm_init(pio, sm, offset, &c);
+
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+%}

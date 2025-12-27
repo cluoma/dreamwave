@@ -1,0 +1,99 @@
+;
+; maple_rx.pio
+;
+; Read bits from the Dreamcast Maple bus
+;
+; Copyright (c) 2024 Colin Luoma
+;
+
+
+.program maple_rx
+
+start:
+    wait 1 pin 0
+    wait 1 pin 1
+    mov x pins              ; Read pins
+loop:
+    mov y pins              ; Read pins
+    jmp x!=y check_val      ; Branch if pins changed since last read
+mid_loop:
+    mov x y                 ;
+    jmp loop                ; Pins stayed the same, loop
+
+check_val:
+    jmp !x mid_loop         ; If X is 0, this means that pins changed because of a rising edge, so just return
+
+    jmp y-- not_zero        ; If Y == 0, then both pins are LOW and we get a 0 data bit
+    set x 0                 ; Y was 0
+    jmp send_zero
+
+not_zero:
+    jmp y-- not_one         ; If Y == 1, then 1 pin is HIGH and we get a 1 data bit
+    set x 1
+    jmp send_one
+not_one:
+    jmp y-- not_two         ; If Y == 2, then 1 pin is HIGH and we get a 1 data bit
+    set x 2
+    jmp send_one
+not_two:                    ; Y == 3, so both pins are HIGH, this is meaningless
+    set x 3
+    jmp loop
+
+send_zero:
+    set y 0                 ; Send a 0 to the ISR and go back to checking for pin changes
+    jmp send_bit
+send_one:
+    set y 1                 ; Send a 1 to the ISR and go back to checking for pin changes
+send_bit:
+    in y 1
+    jmp loop
+
+% c-sdk {
+#include "hardware/clocks.h"
+#include "hardware/gpio.h"
+
+static inline void maple_rx_program_init(PIO pio, uint sm, uint offset, uint pin, float clock_div)
+{
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, false);
+
+    pio_sm_config c = maple_rx_program_get_default_config(offset);
+
+    sm_config_set_in_pins(&c, pin); // for WAIT, IN
+    sm_config_set_jmp_pin(&c, pin); // for JMP
+
+    // Shift to right, autopush enabled after 8 bits
+    sm_config_set_in_shift(&c, false, true, 8);
+
+    // Deeper FIFO as we're not doing any TX
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+
+    // Set the state machine clock divider
+    sm_config_set_clkdiv(&c, clock_div);
+
+    pio_sm_init(pio, sm, offset, &c);
+
+    // Mask unused IN pins
+    pio->sm[sm].shiftctrl = (pio->sm[sm].shiftctrl & ~PIO_SM0_SHIFTCTRL_IN_COUNT_BITS) + 2;
+
+    // Enable state machine
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+static inline void maple_rx_sm_pause(PIO pio, uint sm)
+{
+    pio_sm_set_enabled(pio, sm, false);
+}
+
+static inline void maple_rx_sm_reset(PIO pio, uint sm)
+{
+    pio_sm_clear_fifos(pio, sm);
+    pio_sm_restart(pio, sm);
+}
+
+static inline void maple_rx_sm_reset_and_resume(PIO pio, uint sm)
+{
+    maple_rx_sm_reset(pio, sm);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+%}
