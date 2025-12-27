@@ -30,7 +30,7 @@ All one needs hardware-wise is a Pico 2 W, a battery, and some charging/power ci
 I wanted a big battery and did not want to modify the controller too much. So, I settled on the following components stuffed into a small case that lives in the second controller slot:
 
 * Raspberry Pi Pico 2 W
-* 150mAh LiPo battery
+* 1500mAh LiPo battery
 * Pimoroni LiPo Shim
 * 3.3 to 5v boost converter
 * Female JST 2.0mm connector
@@ -39,6 +39,14 @@ I wanted a big battery and did not want to modify the controller too much. So, I
 ![Prototype Case](/images/prototype_case.png)
 
 ## Wiring
+
+| Dreamcast Controller Pins (Left to Right) |                        |
+|-------------------------------------------|------------------------|
+| 1                                         | RP2350 Pin 21 (GPIO 16) |
+| 2                                         | 5v                     |
+| 3                                         | GND                    |
+| 4                                         | GND                    |
+| 5                                         | RP2350 Pin 22 (GPIO 17) |
 
 Everything gets wired to the female JST header which can plug directly into the Dreamcast controller's PCB when wired the following way:
 
