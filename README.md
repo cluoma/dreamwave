@@ -35,8 +35,7 @@ I wanted a big battery and did not want to modify the controller too much. So, I
 * 3.3 to 5v boost converter
 * Female JST 2.0mm connector
 
-![Components](/images/components.png)
-![Prototype Case](/images/prototype_case.png)
+![Prototype Case](/images/dreamwave_box.jpg)
 
 ## Wiring
 
@@ -52,6 +51,9 @@ Everything gets wired to the female JST header which can plug directly into the 
 
 ![Wiring](/images/wiring.png)
 
+## Power Usage
+
+The measured current draw from my battery is around 125mA without a VMU and around 160mA with a VMU. Keep this in mind when choosing the capacity of your battery.
 
 # Libraries
 
