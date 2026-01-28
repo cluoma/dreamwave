@@ -30,10 +30,10 @@ All one needs hardware-wise is a Pico 2 W, a battery, and some charging/power ci
 I wanted a big battery and did not want to modify the controller too much. So, I settled on the following components stuffed into a small case that lives in the second controller slot:
 
 * Raspberry Pi Pico 2 W
-* 1500mAh LiPo battery
-* Pimoroni LiPo Shim
-* 3.3 to 5v boost converter
-* Female JST 2.0mm connector
+* 1500mAh LiPo battery ([link](https://www.amazon.ca/dp/B07TXHWBSM))
+* Pimoroni LiPo Shim ([link](https://shop.pimoroni.com/products/pico-lipo-shim?variant=32369543086163))
+* 3.3 to 5v boost converter ([link](https://www.amazon.ca/dp/B0CRSW6ZTW))
+* Female JST 2.0mm connector ([link](https://www.amazon.ca/Female-Connector-Strips-Household-Appliances/dp/B0F36P74QX?dib=eyJ2IjoiMSJ9.LdB9_lhi6VnWwYntnwcqRCbCSOG6UNG_apjB7ptDrShWt3wiNVMIIJgmQV1Xa0gip6znnEyKVURiylmQTo2g7hlO5oFaXmDIlppKAxuLa-j8dKHdtQIQGwWo6VqdUWNHa0kdGxowUdIZ9pvQhSB3gO5voA_yikCboHAmP4HgHbCNFAzQQ2fPKG1_JfV1P4hRSvswwGqsKBlzahWvEhGJh9wcjI6hgy0W_QWLOqTw0062sWWY3CbWc15qj04zY6jb2ZQFaQjQuB51XkFwom3wCI-hoXiYIOsIJ2Ubw_NWdlw.1a0thnoceqp814Rsog_8XJLfOG9PpI4y2xEaPp2LRhE&dib_tag=se&keywords=jst%2Bconnector%2B2.0mm&qid=1769616559&sr=8-8&th=1))
 
 ![Prototype Case](/images/dreamwave_box.jpg)
 
